@@ -1,0 +1,42 @@
+{% set versions = docdir.get_versions() %}
+{% set menu = docdir.get_menu() %}
+{% set docdir_config = config.plugins.docdir %}
+
+
+<script>
+    jQuery(document).on('change', '#select_version', function() {
+        window.location.href = "?version=" + $("#select_version").val();
+    });
+
+</script>
+
+
+<div id="panel" class="sb-slidebar sb-left sb-width-thin sb-active">
+    Versions
+    <select id="select_version">
+        {% for version, selected in versions %}
+            {% if selected %}
+                {% set selected_attr = "selected='selected'" %}
+            {% else %}
+                {% set selected_attr = "" %}
+            {% endif %}
+
+            <option value="{{ version }}" {{ selected_attr }}>{{ version|regex_replace(['/_/'],['.'])}}</option>
+        {% endfor %}
+    </select>
+
+
+    <ul class="navigation">
+        {% for p in menu %}
+            {% if p.header.title %}
+
+                {% if page.slug == p.slug %}
+                    <li class="{{ p.slug }} active"><span>{{ p.title }}</span></li>
+                {% else %}
+                    <li class="{{ p.slug }}"><a href="{{ p.url }}">{{ p.title }}</a></li>
+                {% endif %}
+
+            {% endif %}
+        {% endfor %}
+    </ul>
+</div>
