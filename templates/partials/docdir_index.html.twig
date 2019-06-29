@@ -1,0 +1,5 @@
+{% set versions = docdir.get_versions() %}
+{% set index = docdir.get_index() %}
+{% set docdir_config = config.plugins.docdir %}
+
+{{ index.content }}

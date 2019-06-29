@@ -74,6 +74,20 @@ class Docdir
         return $versions;
     }
 
+    public function get_index()
+    {
+        $grav = Grav::instance();
+        $page = $grav['page'];
+        $docdir_root = $page->url() . "/" . $this->current_version;
+        $query = ['@page.children' => $docdir_root];
+
+        $collection = $page->evaluate($query);
+        $ordered_collection = $collection->order('folder', 'asc');
+
+        return $ordered_collection->first();
+
+    }
+
 
     public function get_menu()
     {
