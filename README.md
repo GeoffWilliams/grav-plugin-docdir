@@ -1,8 +1,49 @@
 # Docdir Plugin
 
-**This README.md file should be modified to describe the features, installation, configuration, and general usage of the plugin.**
+The **Docdir** Plugin is an extension for 
+[Grav CMS](http://github.com/getgrav/grav) to let you publish directories of 
+documents inside your site.
 
-The **Docdir** Plugin is an extension for [Grav CMS](http://github.com/getgrav/grav). Publish directories of documents
+Your documentation should be laid out as follows:
+
+```
+user/pages/02.products/99.anything_you_like
+├── 1_4_0
+│   ├── 01.intro
+│   │   └── doc.md
+│   ├── 02.setup
+│   │   └── doc.md
+│   ├── 03.troubleshooting
+│   │   └── docdir.md
+│   ├── docdir.md
+│   └── images
+├── 2_0_0
+│   ├── 01.basics
+│   │   └── docdir.md
+│   ├── 02.setup
+│   │   └── docdir.md
+│   ├── 03.usage
+│   │   └── docdir.md
+│   ├── 04.troubleshooting
+│   │   └── docdir.md
+│   ├── docdir.md
+│   └── images
+└── docdir.md
+
+```
+
+This gives you a drop-down to switch documentation version, separate docs and 
+images for each version and a stable URI as well. The most recent version is
+shown as the default and this is selected by reverse sorting the version
+directories
+
+**Important**
+To avoid searching files, you must specify the top level directory in each 
+`docdir.md` and `doc.md` files in the frontmatter, eg:
+
+```yaml
+docdir: /products/anything_you_like
+``` 
 
 ## Installation
 
@@ -48,9 +89,9 @@ Note that if you use the Admin Plugin, a file with your configuration named docd
 
 ## Credits
 
-**Did you incorporate third-party code? Want to thank somebody?**
+**Thanks to the [grav-breadcrumbs-plugin](https://github.com/getgrav/grav-plugin-breadcrumbs)**
 
 ## To Do
 
-- [ ] Future plans, if any
+- [ ] Support for more then one layer of children
 

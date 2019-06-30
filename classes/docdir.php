@@ -11,6 +11,7 @@ class Docdir
      */
 
     protected $config;
+    protected $grav;
 
     protected $current_version;
     protected $versions;
@@ -20,8 +21,47 @@ class Docdir
      */
     public function __construct($config)
     {
+        $this->grav = Grav::instance();
         $this->config = $config;
         $this->versions = $this->get_versions();
+    }
+
+    /**
+     * Given the current route and optional docdir, extract the version, eg:
+     * | route                    | docdir   | version |
+     * | ---                      | ---      | ---     |
+     * | /foo/bar/2_2_2           | null     | 2_2_2   |
+     * | /foo/bar/2_2_2/something | /foo/bar | 2_2_2   |
+     * @param route $
+     * @param Docdir $
+     * @return the extracted version
+     */
+    private function extract_version($route, $docdir, $versions)
+    {
+        // remove the route - we now have either nothing so we should use the
+        // default version, or we have a path inside the docdir so our version
+        // is the first element
+        $relative_route = str_replace($docdir, "", $route);
+        $relative_route_split = explode("/", $relative_route);
+
+        // first element is garbage in all cases
+        array_shift($relative_route_split);
+        $logger = $this->grav['log'];
+        $logger->addError("relroute x" . $relative_route . "x");
+        $logger->addError("docdir" . $docdir);
+        $logger->addError(count($relative_route_split));
+        $logger->addError("x" . $relative_route_split[0] . "x");
+        if (count($relative_route_split) == 0)
+        {
+            // no version, select the default
+            $logger->addError("set default version to " . array_keys($versions)[0]);
+            $version = array_keys($versions)[0];
+        }
+        else  //if (count($relative_route_split) > 1)
+        {
+            $version = $relative_route_split[0];
+        }
+        return $version;
     }
 
     /**
@@ -35,8 +75,7 @@ class Docdir
     {
         $versions = array();
 
-        $grav = Grav::instance();
-        $page = $grav['page'];
+        $page = $this->grav['page'];
 
         // docdir is the field set in frontmatter that indicates the top level
         // URL of this doc directory
@@ -54,10 +93,7 @@ class Docdir
         foreach ($ordered_collection as $e)
         {
             $folder = $e->folder();
-            if (preg_match('/\d+_\d+_\d+/', $folder))
-            {
-                $versions[$folder] = false;
-            }
+            $versions[$folder] = false;
         }
 
         if (count($versions))
@@ -65,10 +101,9 @@ class Docdir
             // pick the first defined:
             // * version (GET parameter)
             // * the newest version (selected earlier)
-            $this->current_version = $grav['uri']->query('version') ?? array_keys($versions)[0];
+            $this->current_version = $this->extract_version($this->grav['uri']->route(), $page->header()->docdir, $versions);
+            //$this->current_version = $grav['uri']->query('version') ?? array_keys($versions)[0];
             $versions[$this->current_version] = true;
-//            $logger = $grav['log'];
-//            //$logger->addError("requested CV" . ));
         }
 
         return $versions;
@@ -76,9 +111,12 @@ class Docdir
 
     public function get_index()
     {
-        $grav = Grav::instance();
-        $page = $grav['page'];
-        $docdir_root = $page->url() . "/" . $this->current_version;
+        $page = $this->grav['page'];
+        // depending how we were accessed we may already have the version in the
+        // URI, eg /foo/2_0_0 vs /foo
+        $docdir_root = (strpos($page->url(), $this->current_version) !== false) ?
+            $page->url() : $page->url() . "/" . $this->current_version;
+
         $query = ['@page.children' => $docdir_root];
 
         $collection = $page->evaluate($query);
@@ -91,8 +129,7 @@ class Docdir
 
     public function get_menu()
     {
-        $grav = Grav::instance();
-        $page = $grav['page'];
+        $page = $this->grav['page'];
 
         // where does this docsite directory tree begin? if we have docsite
         // (from frontmatter) then we must be a child node so scan from that
@@ -104,20 +141,11 @@ class Docdir
 
 
         $query = ['@page.children' => $docdir_root];
-        $logger = $grav['log'];
-        $logger->addError("requested XXX" . $docdir_root );
-
-        //$docdir ?
-            // top down search for versions ( URI -> /xx/foo)
-
-            // bottom up search for versions ( URI -> /xx/foo/1_2_3/something)
-        //    ['@self.children' => ''];
-
-       // {% set options = { items: { '@page.children': ((p.url)) }, 'order': {'by': 'folder', 'dir': 'asc'}} %}
-      //  {% set version_collection = page.collection(options) %}
+        // example of how to do logging
+//        $logger = $this->grav['log'];
+//        $logger->addError("requested XXX" . $docdir_root );
 
         $collection = $page->evaluate($query);
-        $logger->addError(count($collection));
         $ordered_collection = $collection->order('folder', 'asc');
 
         return $ordered_collection;
@@ -166,8 +194,7 @@ class Docdir
         // Used to hold the breadcrumbs as they are being generated.
         $hierarchy = array();
 
-        $grav = Grav::instance();
-        $current = $grav['page'];
+        $current = $this->grav['page'];
 
         // If the page is not routable...
         if (!$current) {
@@ -221,7 +248,7 @@ class Docdir
         // If we are configured to include the home page...
         if ($this->config['include_home']) {
             // Get the home page.
-            $home = $grav['pages']->dispatch('/');
+            $home = $this->grav['pages']->dispatch('/');
 
             // If the home page isn't already in the hierarchy...
             if ($home && !array_key_exists($home->url(), $hierarchy)) {

@@ -7,7 +7,7 @@
     var docdir = "{{ page.header.docdir }}";
 
     jQuery(document).on('change', '#select_version', function() {
-        window.location.href = docdir + "?version=" + $("#select_version").val();
+        window.location.href = docdir + "/" + $("#select_version").val();
     });
 
 </script>
