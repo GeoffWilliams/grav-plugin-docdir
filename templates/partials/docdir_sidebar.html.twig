@@ -2,7 +2,6 @@
 {% set menu = docdir.get_menu() %}
 {% set docdir_config = config.plugins.docdir %}
 
-
 <script>
     var docdir = "{{ page.header.docdir }}";
 
@@ -12,10 +11,8 @@
 
 </script>
 
-
-<div id="panel" class="sb-slidebar sb-left sb-width-thin sb-active">
-    Versions
-    <select id="select_version">
+<div id="panel">
+    Version <select id="select_version">
         {% for version, selected in versions %}
             {% if selected %}
                 {% set selected_attr = "selected='selected'" %}

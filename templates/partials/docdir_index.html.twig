@@ -2,4 +2,9 @@
 {% set index = docdir.get_index() %}
 {% set docdir_config = config.plugins.docdir %}
 
+<div id="top-bar">
+{% if config.plugins.breadcrumbs.enabled %}
+    {% include 'partials/breadcrumbs.html.twig' %}
+{% endif %}
+</div>
 {{ index.content }}
