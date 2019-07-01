@@ -72,12 +72,14 @@ class Docdir
         $page = $this->grav['page'];
 
         // docdir is the field set in frontmatter that indicates the top level
-        // URL of this doc directory
-        $docdir = $page->header()->docdir;
+        // URL of this doc directory. Make sure to check property exists first
+        // or script will crash hard if `error_reporting=E_ALL`
+        $docdir = property_exists($page->header(), 'docdir') ?
+            $page->header()->docdir : false;
 
         $query = $docdir ?
             // top down search for versions ( URI -> /xx/foo)
-            ['@page.children' => $page->header()->docdir]:
+            ['@page.children' => $docdir]:
             // bottom up search for versions ( URI -> /xx/foo/1_2_3/something)
             ['@self.children' => ''];
 
@@ -95,7 +97,7 @@ class Docdir
             // pick the first defined:
             // * version (GET parameter)
             // * the newest version (selected earlier)
-            $this->current_version = $this->extract_version($this->grav['uri']->route(), $page->header()->docdir, $versions);
+            $this->current_version = $this->extract_version($this->grav['uri']->route(), $docdir, $versions);
             $versions[$this->current_version] = true;
         }
 
