@@ -93,5 +93,4 @@ Note that if you use the Admin Plugin, a file with your configuration named docd
 
 ## To Do
 
-- [ ] Support for more then one layer of children
 
