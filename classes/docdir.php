@@ -131,19 +131,14 @@ class Docdir
         // point, otherwise look at the requested version number for the pages
         // below where we are accessed from (top level request)
 
-        $docdir_root = ($page->header()->docdir ?? $page->url())
-            . "/" . $this->current_version;
+        $docdir_root = $page->header()->docdir . "/" . $this->current_version;
 
 
-        $query = ['@page.children' => $docdir_root];
-        // example of how to do logging
-//        $logger = $this->grav['log'];
-//        $logger->addError("requested XXX" . $docdir_root );
-
+        # the top level (with version) page
+        $query = ['@page.self' => $docdir_root];
         $collection = $page->evaluate($query);
-        $ordered_collection = $collection->order('folder', 'asc');
 
-        return $ordered_collection;
+        return $collection->first();
     }
 
 

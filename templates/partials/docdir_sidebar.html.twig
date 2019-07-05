@@ -1,6 +1,30 @@
 {% set versions = docdir.get_versions() %}
 {% set menu = docdir.get_menu() %}
 {% set docdir_config = config.plugins.docdir %}
+{% macro loop(page) %}
+    {% for p in page.children.visible %}
+        {% set current_page = (p.active or p.activeChild) ? 'active' : '' %}
+        {% if p.children.visible.count > 0 and (p.active or p.activeChild) %}
+            <li class="has-children {{ current_page }}">
+                <a href="{{ p.url }}">
+                    {% if p.header.icon %}<i class="fa fa-{{ p.header.icon }}"></i>{% endif %}
+                    {{ p.menu }}
+                    <span></span>
+                </a>
+                <ul>
+                    {{ _self.loop(p) }}
+                </ul>
+            </li>
+        {% else %}
+            <li class="{{ current_page }}">
+                <a href="{{ p.url }}">
+                    {% if p.header.icon %}<i class="fa fa-{{ p.header.icon }}"></i>{% endif %}
+                    {{ p.menu }}
+                </a>
+            </li>
+        {% endif %}
+    {% endfor %}
+{% endmacro %}
 
 <script>
     var docdir = "{{ page.header.docdir }}";
@@ -26,16 +50,6 @@
 
 
     <ul class="navigation">
-        {% for p in menu %}
-            {% if p.header.title %}
-
-                {% if page.slug == p.slug %}
-                    <li class="{{ p.slug }} active"><span>{{ p.title }}</span></li>
-                {% else %}
-                    <li class="{{ p.slug }}"><a href="{{ p.url }}">{{ p.title }}</a></li>
-                {% endif %}
-
-            {% endif %}
-        {% endfor %}
+        {{ _self.loop(menu) }}
     </ul>
 </div>
